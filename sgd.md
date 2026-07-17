@@ -38,8 +38,8 @@ Note we can fix index of $\boldsymbol y^{(k)}$  to $j$ as $W_{ij}^{(k)}$ only af
 
 We have that as $y_a^{(k+1)} = f_k(y_b^{(k)})W^{(k+1)}_{ba}$:
 $$
-\begin{equation}\frac{\partial y^{(k+1)}_a}{\partial y^{(k)}_b} = f'_k(y_b^{(k)})W^{(k+1)}_{ba} \text{ (No sum again)}
-\end{equation}
+\begin{align}\frac{\partial y^{(k+1)}_a}{\partial y^{(k)}_b} = f'_k(y_b^{(k)})W^{(k+1)}_{ba} \text{ (No sum again)}
+\end{align}
 $$
 
 ## Implementing Bias
