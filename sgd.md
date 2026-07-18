@@ -12,9 +12,10 @@ Let $d$ be the depth of the network.
 
 Let $\boldsymbol x ^{(0)}, \boldsymbol x ^{(1)}, \ldots, \boldsymbol x ^{(d)}$ be the layers of the neural network. $\boldsymbol x^{(0)}$ is the input layer, and $\boldsymbol x^{(d)}$ the output layer.
 
-Let $f_k$ be the (element-wise) activation function acting on the $k$th layer.
+Let $f_k$ be the (element-wise) activation function acting on the $ k $th layer.
 
-Let $W^{(k)}$ be the matrix of weights at the $k$th layer, i.e. $\boldsymbol x^{(k+1)}=f_k(\boldsymbol x^{(k)}W^{(k)}$).
+Let $W^{(k)}$ be the matrix of weights at the $ k $th layer, i.e.: 
+$$\boldsymbol x^{(k+1)}=f_k(\boldsymbol x^{(k)}W^{(k)})$$
 
 Define $y^{(k)}=\boldsymbol x^{(k)}W^{(k)}$ for convenience - so that $\boldsymbol x^{(k+1)}= f_k(\boldsymbol y^{(k)})$.
 
@@ -38,7 +39,8 @@ Note we can fix index of $\boldsymbol y^{(k)}$  to $j$ as $W_{ij}^{(k)}$ only af
 
 We have that as $y_a^{(k+1)} = f_k(y_b^{(k)})W^{(k+1)}_{ba}$:
 $$
-\begin{align}\frac{\partial y^{(k+1)}_a}{\partial y^{(k)}_b} = f'_k(y_b^{(k)})W^{(k+1)}_{ba} \text{ (No sum again)}
+\begin{align}
+\frac{\partial y^{(k+1)}_a}{\partial y^{(k)}_b} = f'_k(y_b^{(k)})W^{(k+1)}_{ba} \text{ (No sum again)}
 \end{align}
 $$
 
