@@ -1,0 +1,12 @@
+.idea/
+resources/
+*.tex
+*synctex*
+*.aux
+*.fls
+*latexmk
+*.log
+test.ipynb
+test.py
+*.venv
+__pycache__/
