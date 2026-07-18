@@ -36,7 +36,7 @@ We want to find the gradient of $L$ w.r.t $`W^{(k)}`$, i.e. we want:
 \end{align}
 ```
 
-Note we can fix index of $`\boldsymbol y^{(k)}`$  to $j$ as $`W_{ij}^{(k)}$ only affects $L$ through $y^{(k)}_j`$
+Note we can fix index of $`\boldsymbol y^{(k)}`$  to $j$ as $`W_{ij}^{(k)}`$ only affects $L$ through $y^{(k)}_j`$
 
 
 We have that as $`y_a^{(k+1)} = f_k(y_b^{(k)})W^{(k+1)}_{ba}`$:
