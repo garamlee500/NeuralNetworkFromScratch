@@ -12,7 +12,7 @@ Let $d$ be the depth of the network.
 
 Let $\boldsymbol x ^{(0)}, \boldsymbol x ^{(1)}, \ldots, \boldsymbol x ^{(d)}$ be the layers of the neural network. $\boldsymbol x^{(0)}$ is the input layer, and $\boldsymbol x^{(d)}$ the output layer.
 
-Let $f_k$ be the (element-wise) activation function acting on the $ k $th layer.
+Let $f_k$ be the (element-wise) activation function acting on the $`k`$th layer.
 
 Let $W^{(k)}$ be the matrix of weights at the $`k`$th layer, i.e.: 
 $$
