@@ -15,7 +15,9 @@ Let $\boldsymbol x ^{(0)}, \boldsymbol x ^{(1)}, \ldots, \boldsymbol x ^{(d)}$ b
 Let $f_k$ be the (element-wise) activation function acting on the $ k $th layer.
 
 Let $W^{(k)}$ be the matrix of weights at the $ k $th layer, i.e.: 
-$$\boldsymbol x^{(k+1)}=f_k(\boldsymbol x^{(k)}W^{(k)})$$
+$$
+\boldsymbol x^{(k+1)}=f_k(\boldsymbol x^{(k)}W^{(k)})
+$$
 
 Define $y^{(k)}=\boldsymbol x^{(k)}W^{(k)}$ for convenience - so that $\boldsymbol x^{(k+1)}= f_k(\boldsymbol y^{(k)})$.
 
