@@ -19,7 +19,7 @@ Let $W^{(k)}$ be the matrix of weights at the $`k`$th layer, i.e.:
 \boldsymbol x^{(k+1)}=f_k(\boldsymbol x^{(k)}W^{(k)})
 ```
 
-Define $y^{(k)}=\boldsymbol x^{(k)}W^{(k)}$ for convenience - so that $\boldsymbol x^{(k+1)}= f_k(\boldsymbol y^{(k)})$.
+Define $`y^{(k)}=\boldsymbol x^{(k)}W^{(k)}`$ for convenience - so that $`\boldsymbol x^{(k+1)}= f_k(\boldsymbol y^{(k)})`$.
 
 Let the loss function be $L$ so that our loss is $L(\boldsymbol x^{(d)})$. Note $L$ implicitly depends on our target output.
 
