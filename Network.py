@@ -2,13 +2,16 @@ from math import ceil, sqrt
 from typing import Callable
 import matplotlib.pyplot as plt
 import torch
+from torch.multiprocessing import Pool
+import itertools
+
 
 
 class Network:
     def __init__(self) -> None:
  
-        self.minibatch_size = 0
-        self.layers=[]
+        # self.minibatch_size = 0
+        self.layers: list[Layer]=[]
 
     def __repr__(self) -> str:
         return f"Neural network with {len(self.layers)} layers.\n"+\
@@ -207,18 +210,21 @@ class Network:
 
     def update_weights(self, learning_rate):
         for k in range(len(self.layers)):
-            # Want to use mean gradient as this makes learning rate consistent across batch size
-            self.layers[k].update_weights(learning_rate/self.minibatch_size)
+            # (should now be automeaned in batch)
+            self.layers[k].update_weights(learning_rate)#/self.minibatch_size)
 
             # reset gradients
             self.layers[k].gradients.zero_()
-        self.minibatch_size = 0
+        # self.minibatch_size = 0
+
+
 
 
     def calculate_with_gradient(self, inputs: torch.Tensor, target: torch.Tensor, loss_function=torch.nn.CrossEntropyLoss()):
         
         # Calculate another gradient
-        self.minibatch_size+=1
+        # self.minibatch_size+=1
+        
 
 
         self.calculate(inputs)
@@ -230,6 +236,8 @@ class Network:
         yd.requires_grad= True
         loss = loss_function(self.layers[-1].activation_function(yd), target)
         loss.backward()
+
+        # dLossdyk is a tensor containing the gradients for each sample in batch
         dLossdyk = yd.grad
 
 
@@ -240,7 +248,12 @@ class Network:
         # And has weights W^{(1)}
         # And has activation function f_{k}
         for k in range(len(self.layers)-1 , -1, -1):
-            self.layers[k].gradients += torch.transpose(self.layers[k].last_input,0,1) @  dLossdyk
+            # First unsqueeze takes some thing like
+            # [ [0,1], [2,3] ]
+            # to [[[0], [1]], [[2], [3]]] essentially creating column vectors 
+            # second unsqueeze turns vectors into (degenerate?) matrices for multiplication
+            # now must mean gradients across all samples
+            self.layers[k].gradients += (self.layers[k].last_input.unsqueeze(-1)@dLossdyk.unsqueeze(-2)).mean(0)
 
 
             # Get gradient of ReLu/activation
@@ -254,8 +267,14 @@ class Network:
                 result.backward(torch.ones(ykm1.shape))
                 activation_grad = torch.transpose(ykm1.grad, 0 , 1)
 
+                # Activation grad unsqueeze ensures broadcasting works correctly here
+                # Not sure of exact mechanics but ensures each of gradients in activation_grad mulled with weights                
                 # Last row of weights only affected by bias node so not in this derivative
-                dLossdyk =  dLossdyk @ torch.transpose(torch.mul(activation_grad,self.layers[k].weights[:-1]), 0,1 ) 
+                dykdykm1= torch.transpose(torch.mul(activation_grad.unsqueeze(-1),self.layers[k].weights[:-1]), -1,-2)
+
+                # dLossdyk unsqueeze ensures broadcasting is element wise (vector to matrix not one matrix to many matrix)
+                # squeeze to turn matrices back to vectors
+                dLossdyk =  (dLossdyk.unsqueeze(-2) @ dykdykm1).squeeze()
 
 
 
@@ -285,14 +304,20 @@ class Layer:
         # Is gradient of loss respect to weights
         self.gradients = torch.zeros(input_length+1, output_length)
 
-    def calculate(self, prev_layer:torch.Tensor):
-        if prev_layer.dim() == 1:
-            prev_layer = prev_layer.unsqueeze(0)
+    @staticmethod
+    def add_bias(layer: torch.Tensor):
+        if layer.dim() == 1:
+            layer = layer.unsqueeze(0)
 
         # Add bias node
         # Doesn't really affect maths as gradients only depend on weights
-        bias_column = torch.ones((prev_layer.shape[0], 1), dtype=prev_layer.dtype, device=prev_layer.device)
-        self.last_input = torch.cat((prev_layer, bias_column), 1)
+        bias_column = torch.ones(layer.shape[:-1]+(1,), dtype=layer.dtype, device=layer.device)
+
+        return torch.cat((layer, bias_column), -1)
+
+
+    def calculate(self, prev_layer:torch.Tensor):
+        self.last_input = self.add_bias(prev_layer)
         self.last_output = self.activation_function(torch.mm(self.last_input, self.weights))
         return self.last_output.clone()
 
@@ -515,12 +540,12 @@ if __name__ == "__main__":
     xor_network.layers.append(Layer(2, 4, torch.sigmoid))
     xor_network.layers.append(Layer(4, 2, torch.nn.Identity()))
 
-    inputs = torch.tensor([[[0.0,0.0]], [[0.,1.]], [[1.,0.]], [[1., 1]]])
-    outputs = torch.tensor([[0], [1], [1], [0]])
+    inputs = torch.tensor([[0.0,0.0], [0.,1.], [1.,0.], [1., 1]])
+    outputs = torch.tensor([0, 1, 1, 0])
     import random
     for i in range(100):
         j = random.randint(0,3)
-        xor_network.calculate_with_gradient(inputs[j], outputs[j])
+        xor_network.calculate_with_gradient(inputs, outputs)
         xor_network.update_weights(0.1)
 
 
