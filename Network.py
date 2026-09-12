@@ -225,6 +225,8 @@ class Network:
         # Calculate another gradient
         # self.minibatch_size+=1
         
+        # TODO : allow for mean vs sum for gradient - maybe good if batch
+        # is split across two batches of diff. size?
 
 
         self.calculate(inputs)
@@ -265,8 +267,8 @@ class Network:
                 ykm1.requires_grad = True
                 result = self.layers[k-1].activation_function(ykm1)
                 result.backward(torch.ones(ykm1.shape))
-                activation_grad = torch.transpose(ykm1.grad, 0 , 1)
 
+                activation_grad = ykm1.grad
                 # Activation grad unsqueeze ensures broadcasting works correctly here
                 # Not sure of exact mechanics but ensures each of gradients in activation_grad mulled with weights                
                 # Last row of weights only affected by bias node so not in this derivative
@@ -288,6 +290,7 @@ class Layer:
         
         self.weights = torch.empty(input_length+1, output_length)
         # TODO: UNDERSTAND THIS
+        # TODO: Allow this to be varied
         # (basic randomness seems sensible)
         torch.nn.init.normal_(self.weights, 0, sqrt(2/input_length))
 
@@ -537,8 +540,8 @@ class Layer:
 
 if __name__ == "__main__":
     xor_network = Network()
-    xor_network.layers.append(Layer(2, 4, torch.sigmoid))
-    xor_network.layers.append(Layer(4, 2, torch.nn.Identity()))
+    xor_network.layers.append(Layer(2, 3, torch.sigmoid))
+    xor_network.layers.append(Layer(3, 2, torch.nn.Identity()))
 
     inputs = torch.tensor([[0.0,0.0], [0.,1.], [1.,0.], [1., 1]])
     outputs = torch.tensor([0, 1, 1, 0])
