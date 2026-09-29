@@ -17,9 +17,10 @@ class Network:
         return f"Neural network with {len(self.layers)} layers.\n"+\
             f"Has layers: {"".join("\n" + layer.__repr__() for layer in self.layers)}"
 
-    def calculate(self, inputs: torch.Tensor):
+    def calculate(self, inputs: torch.Tensor, momentum=0.):
         current_output = inputs
         for i in range(len(self.layers)):
+            self.layers[i].lookahead(momentum)
             current_output = self.layers[i].calculate(current_output)
         
         return current_output
@@ -213,14 +214,12 @@ class Network:
             # (should now be automeaned in batch)
             self.layers[k].update_weights(learning_rate)#/self.minibatch_size)
 
-            # reset gradients
-            self.layers[k].gradients.zero_()
         # self.minibatch_size = 0
 
 
 
 
-    def calculate_with_gradient(self, inputs: torch.Tensor, target: torch.Tensor, loss_function=torch.nn.CrossEntropyLoss()):
+    def calculate_with_gradient(self, inputs: torch.Tensor, target: torch.Tensor, loss_function=torch.nn.CrossEntropyLoss(), momentum=0.):
         
         # Calculate another gradient
         # self.minibatch_size+=1
@@ -229,7 +228,7 @@ class Network:
         # is split across two batches of diff. size?
 
 
-        self.calculate(inputs)
+        self.calculate(inputs, momentum)
 
         # I could derive the gradient for each loss/activation function mathematically but that wouldn't be in spirit of this project
         # (I already know how to find the gradient of a function by hand)
@@ -306,6 +305,9 @@ class Layer:
         # Store gradient (temporarily) for sgd
         # Is gradient of loss respect to weights
         self.gradients = torch.zeros(input_length+1, output_length)
+
+        self.weight_velocities = torch.zeros(input_length+1, output_length)
+        self._lookahead_momentum = 0
 
     @staticmethod
     def add_bias(layer: torch.Tensor):
@@ -533,9 +535,18 @@ class Layer:
     
 
     def update_weights(self, learning_rate):
-        self.weights = self.weights-self.gradients*learning_rate
+        # Update weights, resetting lookahead (must be same as momentum for lookahead)
+        # nesterov momentum
+        self.weights -= self._lookahead_momentum * self.weight_velocities
+        self.weight_velocities = self._lookahead_momentum * self.weight_velocities - learning_rate * self.gradients
+        self._lookahead_momentum = 0
 
-
+        self.weights += self.weight_velocities
+        self.gradients.zero_()
+    def lookahead(self, momentum):
+        # adjust weights for use with nesterov momentum
+        self._lookahead_momentum=momentum
+        self.weights += momentum * self.weight_velocities
 
 
 if __name__ == "__main__":
